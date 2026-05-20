@@ -1,3 +1,4 @@
+import mensajeria.*
 import mensajeros.*
 import destinos.*
 import vehiculos.*
@@ -10,13 +11,136 @@ describe "group of tests for destinos y mensajeros" {
     roberto.vehiculo(camion)
     camion.cantAcoplados(1)
     paquete.estaPagado(true)
-    paquete.destino(puenteDeBrooklyn)
+    paquete.agregarDestino(puenteDeBrooklyn)
     assert.that(paquete.puedeEntregarseCon(roberto))
   }
-  test "Que neo con crédito no puede llevar un paquete que no está pago a la matrix." {
-    neo.credito(10)
+  test "Neo con crédito no puede llevar un paquete que no está pago a la matrix." {
+    neo.credito(true)
     paquete.estaPagado(false)
-    paquete.destino(matrix)
+    paquete.agregarDestino(matrix)
     assert.notThat(paquete.puedeEntregarseCon(neo))
   }
+  //SEGUNDA PARTE: EMPRESA DE MENSAJERIA
+  test "Roberto es contratado"{
+    mensajeria.contratarA(roberto)
+    assert.that(mensajeria.existeMensajero(roberto))
+  }
+  test "roberto es contratado y luego lo despediden de la mensajeria" {
+    mensajeria.contratarA(roberto)
+    mensajeria.despedirA(roberto)
+    assert.notThat(mensajeria.existeMensajero(roberto))
+  }
+  test "Contratan a roberto y a neo y luego despieden a todos los mensajeros" {
+    mensajeria.contratarA(roberto)
+    mensajeria.contratarA(neo)
+    mensajeria.despedirALosMensajeros()
+    assert.that(mensajeria.mostrarMensajeros().isEmpty())
+  }
+  test "Neo es primer empleado de la empresa mensajeria y puede llevar el paquete a la matrix"{
+    mensajeria.contratarA(neo)
+    neo.credito(true)
+    paquete.estaPagado(true)
+    paquete.agregarDestino(matrix)
+    assert.that(mensajeria.entregaElPrimerEmpleado(paquete))
+  }
+
+  test "ChuckNorris es el ultimo empleado de las lista su peso es de 80"{
+    mensajeria.contratarA(neo)
+    mensajeria.contratarA(chuckNorris)
+    assert.equals(80, mensajeria.pesoDelUltimoMensajero())
+  }
+  
+  //TERCERA PARTE MENSAJERIA RECARGADA
+
+  test "La mensajeria contrata Roberto, Neo. Roberto pesa 90 kg y usa un camion con 2 acoplados. La mensajeria quiere enviar el paquete a la matrix y puede hacerlo con algun mensajero disponible "  {
+    roberto.pesoMensajero(90)
+    roberto.vehiculo(camion)
+    camion.cantAcoplados(2)
+    mensajeria.contratarA(roberto)
+    mensajeria.contratarA(neo)
+    paquete.agregarDestino(matrix)
+    assert.that(mensajeria.puedeSerEntregadoPorAlgunMensajero(paquete))
+
+  } //OK test
+  
+  test "La mensajeria contrata Roberto, Neo, chuckNorris, neo y tiene que enviar un paquete la matrix. Solo neo y chuckNorris pueden llevarlos. Roberto pesa 90 kg y se transporta en un camion de 2 acoplados" {
+      roberto.pesoMensajero(90)
+      roberto.vehiculo(camion)
+      camion.cantAcoplados(2)
+      mensajeria.contratarA(roberto)
+      mensajeria.contratarA(neo)
+      mensajeria.contratarA(chuckNorris)
+      paquete.agregarDestino(matrix)
+      assert.that(mensajeria.mensajerosQuePuedenLlevar(paquete).contains(neo))
+      assert.that(mensajeria.mensajerosQuePuedenLlevar(paquete).contains(chuckNorris))
+      assert.notThat(mensajeria.mensajerosQuePuedenLlevar(paquete).contains(roberto))
+  } //OK TEST
+
+   test "La mensajeria contrata Roberto, Neo, chuckNorris. La mensajeria tiene sobre peso. Roberto pesa 90 kg y usa un camion con 1 acoplado" {
+    roberto.pesoMensajero(90)
+    roberto.vehiculo(camion)
+    camion.cantAcoplados(1)
+    mensajeria.contratarA(roberto)
+    mensajeria.contratarA(neo)
+    mensajeria.contratarA(chuckNorris)
+    assert.that(mensajeria.mensajeriaTieneSobrepeso())
+  } // OK TEST
+
+  test "La mensajeria contrata Roberto, Neo, chuckNorris.Tiene en su lista a enviar el paquetonViajero, y paquete. Quiere enviar solo en paquetonViajero, El total es de 200, esta todo pago,Neo puede entregar el paquetonViajero con destinos a puenteDeBrooklyn y matrix"{
+    mensajeria.agregarAPaquetesAEnviar(paquetonViajero)
+    mensajeria.agregarAPaquetesAEnviar(paquete)
+    mensajeria.contratarA(roberto)
+    mensajeria.contratarA(neo)
+    mensajeria.contratarA(chuckNorris)
+    paquetonViajero.pagarCon(200)
+    paquetonViajero.agregarDestino(puenteDeBrooklyn)
+    paquetonViajero.agregarDestino(matrix)
+    mensajeria.enviarElPaquete(paquetonViajero)
+    assert.notThat(mensajeria.paquetesActuales().contains(paquetonViajero))
+  } //Ok test
+  test "La mensajeria contrata Roberto.Tiene en su lista a enviar el paquetonViajero, y paquete.El paquete no esta pago, queda en paquetes pendientes, no se puede enviar"{
+    mensajeria.agregarAPaquetesAEnviar(paquetonViajero)
+    mensajeria.agregarAPaquetesAEnviar(paquete)
+    mensajeria.contratarA(roberto)
+    paquete.estaPagado(false)
+    mensajeria.enviarPaquete(paquete)
+    assert.that(mensajeria.paquetesPendientes().contains(paquete))
+  } //Ok test
+ 
+  test "La mensajeria contrata Neo. La mensajeria puede enviar el paquete y el paquetito, ambos pagos a la matrix. El valor total de paquetes enviados es de $50" {
+    mensajeria.agregarAPaquetesAEnviar(paquete)
+    mensajeria.agregarAPaquetesAEnviar(paquetito)
+    mensajeria.contratarA(neo)
+    paquete.estaPagado(true)
+    paquete.agregarDestino(matrix)
+    paquetito.estaPagado(true)
+    paquetito.agregarDestino(matrix)
+    mensajeria.enviarPaquete(paquete)
+    mensajeria.enviarPaquete(paquetito)
+    assert.equals(50, mensajeria.facturacion())
+  }
+  test "La mensajeria tiene pendientes paquete y el paquetito. Ambos estan pagos. El destino es a la matrix. Se envian todos los paquetes. Contratan a Neo" {
+    mensajeria.agregarAPaquetesPendientes(paquete)
+    mensajeria.agregarAPaquetesPendientes(paquetito)
+    mensajeria.contratarA(neo)
+    paquete.estaPagado(true)
+    paquetito.estaPagado(true)
+    paquete.agregarDestino(matrix)
+    paquetito.agregarDestino(matrix)
+    mensajeria.enviarTodosLosPaquetesDe(mensajeria.paquetesPendientes())
+    assert.that(mensajeria.paquetesPendientes().isEmpty())
+  }
+  test "La mensajeria tiene pendientes paquete y el paquetito. El paquete mas caro es el paquete. Es enviado por neo" {
+    mensajeria.agregarAPaquetesPendientes(paquete)
+    mensajeria.agregarAPaquetesPendientes(paquetito)
+     mensajeria.contratarA(neo)
+    paquete.estaPagado(true)
+    paquetito.estaPagado(true)
+    paquete.agregarDestino(matrix)
+    paquetito.agregarDestino(matrix)
+    mensajeria.enviarPaquete(mensajeria.paquetePendienteMasCaro())
+    assert.notThat(mensajeria.paquetesPendientes().contains(mensajeria.paquetePendienteMasCaro()))
+  }
 }
+
+//REVISAR ULTIMOS TEST

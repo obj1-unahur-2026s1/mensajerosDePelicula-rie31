@@ -1,7 +1,7 @@
 import vehiculos.*
 
 object roberto {
-  var vehiculo= camion //Bicicleta o camion
+  var vehiculo= bicicleta //Bicicleta o camion
   var pesoMensajero= 100
   method pesoMensajero(unPeso) {
     pesoMensajero=unPeso
@@ -9,20 +9,20 @@ object roberto {
   method vehiculo(unVehiculo) {
     vehiculo=unVehiculo
   }
-  method peso() {
+  method pesoTotal() {
     return pesoMensajero + vehiculo.peso()
   }
   method puedeLlamar() = false
 }
 object chuckNorris {
-  method peso() = 80
+  method pesoTotal() = 80
   method puedeLlamar() = true  
 }
 object neo {
-  var creditoDisponible=10
-  method credito(monto) {
-    creditoDisponible=monto
+  var tieneCredito=true
+  method credito(condicion) {
+    tieneCredito=condicion
   }
-  method peso() = 0
-  method puedeLlamar() = creditoDisponible>0
+  method pesoTotal() = 0
+  method puedeLlamar() = tieneCredito
 }

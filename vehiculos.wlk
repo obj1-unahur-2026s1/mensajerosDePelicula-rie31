@@ -7,6 +7,6 @@ object camion {
     acoplados=cant
   } 
   method peso() {
-    return  acoplados * 50
+    return  acoplados * 500 //Media tonelada
   } 
 }
